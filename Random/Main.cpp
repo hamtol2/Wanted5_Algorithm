@@ -14,6 +14,17 @@ int RandomRange(int min, int max)
 	return ( (rand() * diff) / (RAND_MAX + 1) ) + min;
 }
 
+// 부동소수 난수 생성 함수.
+float RandomRange(float min, float max)
+{
+	// 0-1 사이의 부동소수 난수 구하기.
+	float percent = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+
+	// 전달 받은 구간으로 변환.
+	float diff = (max - min);
+	return (percent * diff) + min;
+}
+
 int main()
 {
 	// 현재 시간 값을 받음.
@@ -24,11 +35,10 @@ int main()
 	// 종자값(seed).
 	srand(static_cast<uint32_t>(seed));
 
-
 	const int count = 5;
 	for (int ix = 0; ix < count; ++ix)
 	{
 		//std::cout << "Random Number: " << rand() << "\n";
-		std::cout << "Random Number: " << RandomRange(1, 10) << "\n";
+		std::cout << "Random Number: " << RandomRange(1.0f, 5.0f) << "\n";
 	}
 }
