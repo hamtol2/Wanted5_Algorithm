@@ -7,4 +7,5 @@
   <Project Path="BubbleSort/BubbleSort.vcxproj" Id="0793c76b-983e-458d-98f3-c760f90ff6b0" />
   <Project Path="Random/Random.vcxproj" Id="1f56c291-e05d-4836-9ece-0088462bd42b" />
   <Project Path="Recursive/Recursive.vcxproj" Id="abb7607a-2d06-4071-ae4e-ae808bbd596f" />
+  <Project Path="SelectionSort/SelectionSort.vcxproj" Id="897a7e4a-1015-4ee9-9ad0-cd039aff0e5b" />
 </Solution>

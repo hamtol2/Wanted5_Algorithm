@@ -2,11 +2,23 @@
 #include <functional>
 
 // 교환 함수.
+//void Swap(int& a, int& b)
+//{
+//	int temp = a;
+//	a = b;
+//	b = temp;
+//}
+
+// 10^20^20 => 10.
+// a = 10, b = 20;
+// a = a^b; 10^20;
+// b = b^a; 10;
+// a = a^b; 20
 void Swap(int& a, int& b)
 {
-	int temp = a;
-	a = b;
-	b = temp;
+	a = a ^ b;
+	b = b ^ a;
+	a = a ^ b;
 }
 
 // 로직(기능)을 주입할 때 함수 포인터 활용.
