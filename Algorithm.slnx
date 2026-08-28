@@ -6,6 +6,7 @@
   <Project Path="BruteForce/BruteForce.vcxproj" Id="27d3cd90-7ca5-4d2a-8aef-ab56bae4a161" />
   <Project Path="BubbleSort/BubbleSort.vcxproj" Id="0793c76b-983e-458d-98f3-c760f90ff6b0" />
   <Project Path="InsertionSort/InsertionSort.vcxproj" Id="cf1bf762-2a5b-45e1-919e-e7047560c6b8" />
+  <Project Path="MergeSort/MergeSort.vcxproj" Id="2125b51c-e554-4c41-86eb-b156bb3958e5" />
   <Project Path="QuickSort/QuickSort.vcxproj" Id="dd360c2f-d856-4280-8a28-0e497251068e" />
   <Project Path="Random/Random.vcxproj" Id="1f56c291-e05d-4836-9ece-0088462bd42b" />
   <Project Path="Recursive/Recursive.vcxproj" Id="abb7607a-2d06-4071-ae4e-ae808bbd596f" />

@@ -236,7 +236,7 @@ int main()
 	srand(static_cast<uint32_t>(time(nullptr)));
 
 	// 배열 수.
-	const int length = 10000;
+	const int length = 100000;
 
 	// 배열.
 	//int original[length] = {};
@@ -260,7 +260,7 @@ int main()
 	// 버블 정렬.
 	//int64_t start = GetTime();
 	bubbleSortTimer.CheckStartStat();
-	BubbleSort(array, length);
+	//BubbleSort(array, length);
 	//int64_t end = GetTime();
 	bubbleSortTimer.CheckEndStat();
 
@@ -272,7 +272,7 @@ int main()
 	bubbleSortTimer.Reset();
 	//start = GetTime();
 	bubbleSortTimer.CheckStartStat();
-	BubbleSort(array, length, Greater);
+	//BubbleSort(array, length, Greater);
 	//end = GetTime();
 	bubbleSortTimer.CheckEndStat();
 
