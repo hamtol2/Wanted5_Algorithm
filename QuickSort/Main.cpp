@@ -3,6 +3,7 @@
 #include <ctime>
 #include <Windows.h>
 #include <algorithm>
+#include <stack>
 
 // 비교를 위한 함수 포인터.
 typedef bool (*Comparer)(int, int);
@@ -95,14 +96,45 @@ void QuickSort(int* array, int left, int right, Comparer comparer = LessEqual)
 		return;
 	}
 
-	// 분할 - 피벗 선택 및 분할.
-	int pivotIndex = Partition(array, left, right, comparer);
+	// 스택에 left/right를 저장하기 위한 구조체.
+	struct Range
+	{
+		int left = 0;
+		int right = 0;
+	};
 
-	// 왼쪽 분할 배열 정렬 진행.
-	QuickSort(array, left, pivotIndex - 1, comparer);
+	// 스택 오버 플로우 방지를 위해 스택 자료구조 활용.
+	std::stack<Range> stack;
+	stack.push(Range{ left, right });
 
-	// 오른쪽 분할 배열 정렬 진행.
-	QuickSort(array, pivotIndex + 1, right, comparer);
+	// 스택을 비울 때 까지 반복.
+	while (!stack.empty())
+	{
+		// 스택에서 꺼내기.
+		Range current = stack.top();
+		stack.pop();
+
+		int pivotIndex = Partition(array, current.left, current.right, comparer);
+
+		// 왼쪽 분할.
+		if (current.left < pivotIndex - 1)
+		{
+			stack.push(Range{ current.left, pivotIndex - 1 });
+		}
+		if (pivotIndex + 1 < current.right)
+		{
+			stack.push(Range{ pivotIndex + 1, current.right });
+		}
+	}
+
+	//// 분할 - 피벗 선택 및 분할.
+	//int pivotIndex = Partition(array, left, right, comparer);
+
+	//// 왼쪽 분할 배열 정렬 진행.
+	//QuickSort(array, left, pivotIndex - 1, comparer);
+
+	//// 오른쪽 분할 배열 정렬 진행.
+	//QuickSort(array, pivotIndex + 1, right, comparer);
 }
 
 // 현재 시간 반환 함수.
@@ -150,16 +182,65 @@ int CompareTwoInts(const void* a, const void* b)
 	return 0;
 }
 
+// 스탯 타이머 예시.
+class StatTimer
+{
+public:
+	StatTimer(const std::string& tag)
+		: tag(tag)
+	{
+	}
+
+	void CheckStartStat()
+	{
+		LARGE_INTEGER counter;
+		QueryPerformanceCounter(&counter);
+		start = counter.QuadPart;
+	}
+
+	void CheckEndStat()
+	{
+		LARGE_INTEGER counter;
+		QueryPerformanceCounter(&counter);
+		end = counter.QuadPart;
+	}
+
+	void Reset()
+	{
+		start = end = 0;
+	}
+
+	void PrintResult()
+	{
+		std::cout << "[" << tag << "] elapsed: " << GetElapsed() << "\n";
+	}
+
+private:
+	float GetElapsed()
+	{
+		LARGE_INTEGER frequency;
+		QueryPerformanceFrequency(&frequency);
+		return static_cast<float>(end - start)
+			/ static_cast<float>(frequency.QuadPart);
+	}
+
+private:
+	std::string tag;
+	int64_t start = 0;
+	int64_t end = 0;
+};
+
 int main()
 {
 	// 랜덤에 시드 전달.
 	srand(static_cast<uint32_t>(time(nullptr)));
 
 	// 배열 수.
-	const int length = 3000;
+	const int length = 10000;
 
 	// 배열.
-	int original[length] = {};
+	//int original[length] = {};
+	int* original = new int[length] {};
 	for (int ix = 0; ix < length; ++ix)
 	{
 		int value = RandomRange(1, length);
@@ -167,26 +248,38 @@ int main()
 	}
 
 	// 정렬에 사용할 배열.
-	int array[length] = {};
+	//int array[length] = {};
+	int* array = new int[length] {};
 
 	// 메모리 복사 -> 빠름.
 	memcpy(array, original, sizeof(int) * length);
 
+	// 스탯 타이머.
+	StatTimer bubbleSortTimer("BubbleSort");
+
 	// 버블 정렬.
-	int64_t start = GetTime();
+	//int64_t start = GetTime();
+	bubbleSortTimer.CheckStartStat();
 	BubbleSort(array, length);
-	int64_t end = GetTime();
+	//int64_t end = GetTime();
+	bubbleSortTimer.CheckEndStat();
 
 	// 경과시간 출력.
-	std::cout << "BubbleSort elapsed time: " << GetElapsedTime(start, end) << "\n";
+	//std::cout << "BubbleSort elapsed time: " << GetElapsedTime(start, end) << "\n";
+	bubbleSortTimer.PrintResult();
 
 	// 버블 정렬.
-	start = GetTime();
+	bubbleSortTimer.Reset();
+	//start = GetTime();
+	bubbleSortTimer.CheckStartStat();
 	BubbleSort(array, length, Greater);
-	end = GetTime();
+	//end = GetTime();
+	bubbleSortTimer.CheckEndStat();
 
 	// 경과시간 출력.
-	std::cout << "BubbleSort elapsed time: " << GetElapsedTime(start, end) << "\n";
+	//std::cout << "BubbleSort elapsed time: " << GetElapsedTime(start, end) << "\n";
+
+	bubbleSortTimer.PrintResult();
 
 	// 출력.
 	//std::cout << "정렬 전 배열: ";
@@ -195,40 +288,59 @@ int main()
 	// 메모리 복사 -> 빠름.
 	memcpy(array, original, sizeof(int) * length);
 
+	StatTimer qsortTimer("qsort");
+
 	// 라이브러리 qsort 함수 사용.
-	start = GetTime();
+	//start = GetTime();
+	qsortTimer.CheckStartStat();
 	qsort(array, length, sizeof(int), CompareTwoInts);
-	end = GetTime();
+	//end = GetTime();
+	qsortTimer.CheckEndStat();
 
 	// 시간 출력.
-	std::cout << "qsort elapsed time: " << GetElapsedTime(start, end) << "\n";
+	//std::cout << "qsort elapsed time: " << GetElapsedTime(start, end) << "\n";
+	qsortTimer.PrintResult();
 
 	// 메모리 복사 -> 빠름.
 	memcpy(array, original, sizeof(int) * length);
 
 	// 시간 재보기.
 	// 시작 시간 기록.
-	start = GetTime();
+	//start = GetTime();
 
+	StatTimer quickSortTimer("QuickSort");
+	quickSortTimer.CheckStartStat();
 	// 정렬.
 	QuickSort(array, 0, length - 1, LessEqual);
 
 	// 정렬 후 시간 기록.
-	end = GetTime();
+	//end = GetTime();
+	quickSortTimer.CheckEndStat();
+	quickSortTimer.PrintResult();
 
 	// 경과 시간(단위: 초).
-	float elapsed = GetElapsedTime(start, end);
+	//float elapsed = GetElapsedTime(start, end);
 
 	// 시간 출력.
-	std::cout << "QuickSort elapsed time: " << elapsed << "\n";
+	//std::cout << "QuickSort elapsed time: " << elapsed << "\n";
 
-	start = GetTime();
+	//start = GetTime();
+	quickSortTimer.Reset();
+	quickSortTimer.CheckStartStat();
 	QuickSort(array, 0, length - 1, GreaterEqual);
-	end = GetTime();
+	//end = GetTime();
+	quickSortTimer.CheckEndStat();
+	//std::cout << "QuickSort elapsed time: " << GetElapsedTime(start, end) << "\n";
 
-	std::cout << "QuickSort elapsed time: " << GetElapsedTime(start, end) << "\n";
+	quickSortTimer.PrintResult();
 
 	// 정렬 후 출력.
 	//std::cout << "\n정렬 후 배열: ";
 	//PrintArray(array, length);
+
+	delete[] original;
+	original = nullptr;
+
+	delete[] array;
+	array = nullptr;
 }
