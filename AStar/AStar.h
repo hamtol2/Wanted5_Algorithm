@@ -40,6 +40,36 @@ private:
 	// 노드 생성 전문 함수.
 	Node* CreateNode(const Position& position, Node* parent = nullptr);
 
+	// 부모 노드를 역추적해서 경로를 구성하는 함수.
+	std::vector<Position> ConstructPath(Node* destination);
+
+	// 휴리스틱(추정 비용) 계산 함수.
+	float CalculateHeuristic(const Position& current, const Position& goal) const;
+
+	// 그리드 검증 함수.
+	bool IsValidGrid(const std::vector<std::vector<int>>& grid) const;
+
+	// 이동하려는 좌표가 유효한지 확인.
+	bool IsInRange(int x, int y, const std::vector<std::vector<int>>& grid) const;
+
+	// 옵션: 대각선 이동이 장애물 모서리를 통과하는지 확인.
+	bool IsDiagonalBlocked(
+		const Position& current,
+		const Direction& direction,
+		const std::vector<std::vector<int>>& grid) const;
+
+	// Open목록 및 Closed 목록 검사 함수.
+	Node* FindOpenNode(int x, int y) const;
+	bool IsInClosedList(int x, int y) const;
+	
+	// 목적지 인지 확인하는 함수.
+	bool IsDestination(const Node* node) const;
+
+	// 이전 탐색 표시를 지우고 그리드를 출력하는 함수.
+	void ClearVisualization(std::vector<std::vector<int>>& grid) const;
+	void DisplayGrid(std::vector<std::vector<int>>& grid) const;
+
+
 private:
 	// 동적 할당된 모든 노드를 소유하는 목록.
 	// 메모리 관리를 위해 사용.
