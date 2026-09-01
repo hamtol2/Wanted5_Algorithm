@@ -81,16 +81,166 @@ std::vector<Position> AStar::FindPath(
     // openList가 빌 때까지 탐색 반복.
     while (!openList.empty())
     {
+        // openList에서 fCost가 가장 작은 노드를 선택.
+        // 이진힙(heap)을 사용하면 최적화 가능.
+        Node* currentNode = openList[0];
+        for (Node* node : openList)
+        {
+            // 더 작은 비용의 노드 검색.
+            if (node->fCost < currentNode->fCost
+                || (node->fCost == currentNode->fCost
+                    && node->hCost < currentNode->hCost))
+            {
+                currentNode = node;
+            }
+        }
 
+        // 목표 노드인지 확인.
+        if (IsDestination(currentNode))
+        {
+            // 이동 경로 제작 후 반환.
+            return ConstructPath(currentNode);
+        }
+
+        // 현재 노드를 openList에서 제거.
+        // 방문 처리를 위해.
+        auto iterator = std::find(openList.begin(), openList.end(), currentNode);
+
+        // 검색에 성공했는지 확인.
+        if (iterator != openList.end())
+        {
+            // openList에서 제거.
+            openList.erase(iterator);
+        }
+
+        // 탐색을 마친 노드를 closedList에 추가.
+        closedList.emplace_back(currentNode);
+
+        // 현재 위치를 기준으로 주변(8방향)의 이웃노드를 탐색.
+        for (const Direction& direction : directions)
+        {
+            // 현재 노드를 기준으로 인접한 노드의 좌표 계산.
+            // 새로운 좌표(위치) = 현재 위치 + 이동 방향.
+            int newX = currentNode->position.x + direction.x;
+            int newY = currentNode->position.y + direction.y;
+
+            // 예외 처리.
+            if (!IsInRange(newX, newY, grid))
+            {
+                continue;
+            }
+
+            // 새로운 위치가 장애물인지 확인.
+            if (grid[newY][newX] == (int)TileType::Wall)
+            {
+                continue;
+            }
+
+            // 대각선 이동 시 장애물을 통과하는지 확인.
+            if (IsDiagonalBlocked(currentNode->position, direction, grid))
+            {
+                continue;
+            }
+
+            // 이미 방문한 곳이라면 건너뛰기.
+            if (IsInClosedList(newX, newY))
+            {
+                continue;
+            }
+
+            // 현재 노드를 거쳐서 새로운 위치로 가는데 드는 비용 계산.
+            float newGCost = currentNode->gCost + direction.cost;
+
+            // 이미 openList에 있는데 비용면에서 더 나은지 확인.
+            Node* openNode = FindOpenNode(newX, newY);
+            if (openNode)
+            {
+                // 비용 비교.
+                if (newGCost < openNode->gCost)
+                {
+                    openNode->gCost = newGCost;
+                    openNode->fCost = openNode->gCost + openNode->hCost;
+                    openNode->parent = currentNode;
+                }
+
+                continue;
+            }
+
+            // 이웃 노드 생성 및 openList에 추가.
+            Node* neighborNode = CreateNode(Position(newX, newY), currentNode);
+
+            // 새로운 노드의 비용 계산.
+            neighborNode->gCost = newGCost;
+            neighborNode->hCost = CalculateHeuristic(
+                neighborNode->position, goalNode->position);
+            neighborNode->fCost = neighborNode->gCost + neighborNode->hCost;
+
+            // 새로운 노드를 openList에 추가.
+            openList.emplace_back(neighborNode);
+
+            // 옵션: 시각화를 위한 처리.
+            if (grid[newY][newX] == (int)TileType::Ground)
+            {
+                grid[newY][newX] = (int)TileType::Visited;
+            }
+
+            // grid 그리기.
+            DisplayGrid(grid);
+
+            // 스레드 재우기 (애니메이션처럼 단순하게 프레임을 만들기 위해).
+            DWORD delay = static_cast<DWORD>(0.05f * 1000);
+            Sleep(delay);
+        }
     }
 
-    return std::vector<Position>();
+    // 빈 경로 반환(탐색 실패).
+    return { };
 }
 
 void AStar::DisplayGridWithPath(
     std::vector<std::vector<int>>& grid, 
     const std::vector<Position>& path)
 {
+    // 기존에 시각화를 위해 사용했던 값 복구.
+    ClearVisualization(grid);
+    
+    // 맵 그리기.
+    DisplayGrid(grid);
+
+    static HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    int green = FOREGROUND_GREEN;
+
+    // 이동 경로 그리기.
+    for (const Position& position : path)
+    {
+        // 경로 위치의 타일 값 읽기.
+        int value = grid[position.y][position.x];
+
+        // 시작/목표 위치는 경로 표시에서 건너뛰기.
+        if (value == (int)TileType::Start 
+            || value == (int)TileType::Goal)
+        {
+            continue;
+        }
+
+        // 콘솔 좌표.
+        COORD cursorPosition;
+        cursorPosition.X = static_cast<short>(position.x * 2);
+        cursorPosition.Y = static_cast<short>(position.y);
+
+        // 커서 이동.
+        SetConsoleCursorPosition(handle, cursorPosition);
+        
+        // 텍스트 색 지정.
+        SetConsoleTextAttribute(handle, green);
+
+        // 글자 출력.
+        std::cout << "* ";
+        
+        // 스레드 재우기.
+        DWORD delay = static_cast<DWORD>(0.05f * 1000);
+        Sleep(delay);
+    }
 }
 
 void AStar::Clear()
