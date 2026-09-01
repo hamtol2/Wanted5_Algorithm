@@ -17,6 +17,7 @@ public:
 
 public:
 	// 가로/세로 위치.
+	// Soft Renderer...
 	int x = 0;
 	int y = 0;
 };

@@ -14,6 +14,18 @@ private:
 		float cost = 0.0f;
 	};
 
+	// 그리드 타일의 종류(열거형).
+	// char 타입 -> 문자 타입 -> 숫자.
+	// 문자 타입으로 활용 / 1byte 크기를 할당하고 싶을 때 많이 활용.
+	enum class TileType : char
+	{
+		Ground	= 0,
+		Wall	= 1,
+		Start	= 2,
+		Goal	= 3,
+		Visited = 5,
+	};
+
 public:
 	AStar();
 	~AStar();
@@ -32,7 +44,7 @@ public:
 		const std::vector<Position>& path);
 
 private:
-	// 메소드.
+	// 메소드(클래스(또는 구조체)가 가지는 함수/ 공개되지 않은 함수).
 
 	// 이전 탐색에 사용한 정보 및 노드를 정리하는 함수.
 	void Clear();

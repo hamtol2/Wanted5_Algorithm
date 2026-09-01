@@ -61,7 +61,7 @@ std::vector<Position> AStar::ConstructPath(Node* destination)
     while (current)
     {
         // 현재 노드는 경로 배열에 추가.
-        path.emplace_back(current);
+        path.emplace_back(current->position);
 
         // 부모 노드로 이동해서 경로를 역추적.
         current = current->parent;
@@ -75,6 +75,10 @@ std::vector<Position> AStar::ConstructPath(Node* destination)
 
 float AStar::CalculateHeuristic(const Position& current, const Position& goal) const
 {
+    // 옥타일(8방향) 비용 계산법.
+    // 대각선 이동 허용시 주의사항.
+    // -> 대각선 형태의 장애물을 뚫고 가지 못하게 막아야 함.
+
     // 현재 위치와 목표 위치 사이의 차이 계산.
     // std::abs -> 절대값 함수(absolute).
     int diffX = std::abs(current.x - goal.x);
@@ -126,16 +130,51 @@ bool AStar::IsDiagonalBlocked(
     const Direction& direction, 
     const std::vector<std::vector<int>>& grid) const
 {
-    return false;
+    // 이동하려는 방향에 장애물이 있는지 확인.
+    // 대각선 성분만 판단.
+    // 대각선 성분이 아니라면 판단할 필요 없음.
+    // 대각선 방향의 x,y 성분은 모두 0이 아니기 때문.
+    if (direction.x == 0 || direction.y == 0)
+    {
+        return false;
+    }
+
+    // 대각선으로 이동하려는 새로운 위치의 x성분과 y성분을 분해.
+    int sideX = current.x + direction.x;
+    int sideY = current.y + direction.y;
+
+    // 대각선 이동 성분 위치 중 하나라도 장애물(벽)이 있으면 이동 불가.
+    return grid[current.y][sideX] == (int)TileType::Wall
+        || grid[sideY][current.x] == (int)TileType::Wall;
 }
 
 Node* AStar::FindOpenNode(int x, int y) const
 {
+    // 같은 좌표의 노드를 OpenList에서 찾기.
+    for (Node* node : openList)
+    {
+        // 좌표 비교.
+        if (node->position == Position(x, y))
+        {
+            return node;
+        }
+    }
+
     return nullptr;
 }
 
 bool AStar::IsInClosedList(int x, int y) const
 {
+    // 같은 좌표가 ClosedList에 있는지 확인.
+    for (Node* node : closedList)
+    {
+        // 좌표 비교.
+        if (node->position == Position(x, y))
+        {
+            return true;
+        }
+    }
+
     return false;
 }
 
@@ -148,8 +187,22 @@ bool AStar::IsDestination(const Node* node) const
 
 void AStar::ClearVisualization(std::vector<std::vector<int>>& grid) const
 {
+    // 탐색 후보 표시해둔 것을 다시 원상 복구.
+    // 탐색 후보로 표시해뒀다는 건 원래 이동 가능한 위치였다는 것을 의미.
+    for (std::vector<int>& row : grid)
+    {
+        for (int& value : row)
+        {
+            if (value == (int)TileType::Visited)
+            {
+                // 숫자로 0.
+                value = (int)TileType::Ground;
+            }
+        }
+    }
 }
 
-void AStar::DisplayGrid(std::vector<std::vector<int>>&grid) const
+void AStar::DisplayGrid(std::vector<std::vector<int>>& grid) const
 {
+
 }
