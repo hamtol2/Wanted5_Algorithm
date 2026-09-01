@@ -1,5 +1,9 @@
 ﻿#include "AStar.h"
 #include <algorithm>
+#include <iostream>
+
+#define NOMINMAX
+#include <Windows.h>
 
 AStar::AStar()
 {
@@ -11,11 +15,75 @@ AStar::~AStar()
     Clear();
 }
 
+// 최적화?
+// -> 병목을 찾아 적절한 해결방법을 적용.
+// -> 안해도 되는 계산을 찾아서 안하게 만드는 것.
 std::vector<Position> AStar::FindPath(
     const Position & startPosition, 
     const Position & goalPosition, 
-    std::vector<std::vector<int>>&grid)
+    std::vector<std::vector<int>>& grid)
 {
+    // 이전에 탐색한 결과 초기화.
+    Clear();
+
+    // 예외처리.
+    if (!IsValidGrid(grid))
+    {
+        // 유효하지 않으면 빈 배열 반환.
+        //return std::vector<Position>();
+        // STL -> initialize_list.
+        return { };
+    }
+
+    // 시작위치/목표위치가 grid 기준에서 문제 없는 위치 값인지 확인.
+    if (!IsInRange(startPosition.x, startPosition.y, grid)
+        || !IsInRange(goalPosition.x, goalPosition.y, grid))
+    {
+        return { };
+    }
+
+    // 시작위치/목표위치가 이동 불가하면 종료.
+    if (grid[startPosition.y][startPosition.x] == (int)TileType::Wall
+        || grid[goalPosition.y][goalPosition.x] == (int)TileType::Wall)
+    {
+        return { };
+    }
+
+    // 이전 탐색 과정의 시각화 제거(기존에 방문 처리한 값이 있으면 제거).
+    ClearVisualization(grid);
+
+    // 탐색 시작.
+    // 시작/목표 노드 생성.
+    startNode = CreateNode(startPosition);
+    goalNode = CreateNode(goalPosition);
+
+    // 시작 노드의 비용 계산 및 openList에 추가해 탐색 시작.
+    startNode->gCost = 0.0f;
+    startNode->hCost = CalculateHeuristic(startPosition, goalPosition);
+    startNode->fCost = startNode->gCost + startNode->hCost;
+
+    openList.emplace_back(startNode);
+
+    // 편의를 위해 사전 비용 설정.
+    const float diagonalCost = 1.41421f;
+    const std::vector<Direction> directions =
+    {
+        //Direction { 0, -1, 1.0f }, 
+        //Direction(0, -1, 1.0f)
+        { 0, -1, 1.0f }, { 0, 1, 1.0f },    // 상하.
+        { -1, 0, 1.0f }, { 1, 0, 1.0f },    // 좌우.
+        { -1, -1, diagonalCost },           // 좌상단 방향.
+        {  1, -1, diagonalCost },           // 우상단 방향.
+        { -1,  1, diagonalCost },           // 좌하단 방향.
+        {  1,  1, diagonalCost },           // 우하단 방향.
+    };
+
+    // openList가 빌 때까지 탐색 반복.
+    while (!openList.empty())
+    {
+
+    }
+
     return std::vector<Position>();
 }
 
@@ -204,5 +272,50 @@ void AStar::ClearVisualization(std::vector<std::vector<int>>& grid) const
 
 void AStar::DisplayGrid(std::vector<std::vector<int>>& grid) const
 {
+    // 커서를 원점(0, 0)으로 이동.
+    static HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+    static COORD origin = { 0, 0 };
+    SetConsoleCursorPosition(handle, origin);
 
+    // 글자 색.
+    int red = FOREGROUND_RED;
+    int green = FOREGROUND_GREEN;
+    int white = red | green | FOREGROUND_BLUE;
+
+    // grid 순회하면서 글자 그리기.
+    for (int y = 0; y < (int)grid.size(); ++y)
+    {
+        for (int x = 0; x < (int)grid[y].size(); ++x)
+        {
+            // 타일값에 따라 글자 색상 및 글자 지정해서 출력.
+            if (grid[y][x] == (int)TileType::Start)
+            {
+                SetConsoleTextAttribute(handle, red);
+                std::cout << "S ";
+            }
+            else if (grid[y][x] == (int)TileType::Goal)
+            {
+                SetConsoleTextAttribute(handle, red);
+                std::cout << "G ";
+            }
+            else if (grid[y][x] == (int)TileType::Wall)
+            {
+                SetConsoleTextAttribute(handle, white);
+                std::cout << "1 ";
+            }
+            else if (grid[y][x] == (int)TileType::Visited)
+            {
+                SetConsoleTextAttribute(handle, green);
+                std::cout << "+ ";
+            }
+            else
+            {
+                SetConsoleTextAttribute(handle, white);
+                std::cout << "0 ";
+            }
+        }
+
+        // 한 라인(행) 출력이 마무리되면 개행 출력.
+        std::cout << "\n";
+    }
 }

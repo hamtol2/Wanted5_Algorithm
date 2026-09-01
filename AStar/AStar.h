@@ -9,6 +9,15 @@ private:
 	// 이동 방향과 해당 방향의 이동 비용.
 	struct Direction
 	{
+		Direction()
+		{
+		}
+
+		Direction(int x, int y, float cost)
+			: x(x), y(y), cost(cost)
+		{
+		}
+
 		int x = 0;
 		int y = 0;
 		float cost = 0.0f;
