@@ -188,7 +188,7 @@ std::vector<Position> AStar::FindPath(
             DisplayGrid(grid);
 
             // 스레드 재우기 (애니메이션처럼 단순하게 프레임을 만들기 위해).
-            DWORD delay = static_cast<DWORD>(0.05f * 1000);
+            DWORD delay = static_cast<DWORD>(0.1f * 1000);
             Sleep(delay);
         }
     }
@@ -238,7 +238,7 @@ void AStar::DisplayGridWithPath(
         std::cout << "* ";
         
         // 스레드 재우기.
-        DWORD delay = static_cast<DWORD>(0.05f * 1000);
+        DWORD delay = static_cast<DWORD>(0.1f * 1000);
         Sleep(delay);
     }
 }
