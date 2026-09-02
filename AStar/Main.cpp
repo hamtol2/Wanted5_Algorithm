@@ -55,15 +55,15 @@ int main()
 	if (!path.empty())
 	{
 		// 탐색한 좌표와 최종 경로를 출력한다.
-		std::cout << "\n경로를 찾았습니다.\n최단 경로:\n";
+		//std::cout << "\n경로를 찾았습니다.\n최단 경로:\n";
+		//
+		//for (const Position& position : path)
+		//{
+		//	std::cout << "(" << position.x << ", " << position.y << ") -> ";
+		//}
 
-		for (const Position& position : path)
-		{
-			std::cout << "(" << position.x << ", " << position.y << ") -> ";
-		}
-
-		std::cout << "목표 도착\n";
-		std::cout << "경로를 맵에 표시한 결과:\n";
+		//std::cout << "목표 도착\n";
+		//std::cout << "경로를 맵에 표시한 결과:\n";
 		aStar.DisplayGridWithPath(grid, path);
 	}
 	else
