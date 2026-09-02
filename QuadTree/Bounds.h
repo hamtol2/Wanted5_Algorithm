@@ -1,13 +1,14 @@
 ﻿#pragma once
 
+#include <iostream>
+
 // 사각 영역 표현하는 클래스.
 class Bounds
 {
 public:
 	Bounds(int x, int y, int width = 1, int height = 1)
 		: x(x), y(y), width(width), height(height)
-	{
-	}
+	{}
 
 	// Getter.
 	int GetX() const { return x; }
@@ -40,6 +41,17 @@ public:
 	{
 		return other.x < GetXMax() && other.GetXMax() > x
 			&& other.y < GetYMax() && other.GetYMax() > y;
+	}
+
+	// 연산자 오버로딩.
+	friend std::ostream& operator<<(std::ostream& os, const Bounds& bounds)
+	{
+		os << "(" << bounds.x << ", " << bounds.y << ")"
+			<< " Width: " << bounds.width
+			<< " Height: " << bounds.height
+			<< "\n";
+
+		return os;
 	}
 
 private:

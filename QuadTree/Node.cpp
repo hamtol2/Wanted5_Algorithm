@@ -1,4 +1,5 @@
 ﻿#include "Node.h"
+#include "QuadTree.h"
 
 Node::Node(const Bounds& bounds, int depth)
 	: bounds(bounds), depth(depth)
@@ -97,8 +98,7 @@ void Node::Clear()
 bool Node::Subdivide()
 {
 	// 최대 깊이 확인.
-	// Todo: 쿼드 트리에 최대 깊이 설정.
-	if (depth >= 4)
+	if (depth >= QuadTree::maxDepth)
 	{
 		return false;
 	}
@@ -112,10 +112,10 @@ bool Node::Subdivide()
 	// 아직 분할되지 않았으면 분할 진행.
 	
 	// 영역을 나누기 위한 값.
-	float x = bounds.GetX();
-	float y = bounds.GetY();
-	float halfWidth = bounds.GetWidth() / 2;
-	float halfHeight = bounds.GetHeight() / 2;
+	int x = bounds.GetX();
+	int y = bounds.GetY();
+	int halfWidth = bounds.GetWidth() / 2;
+	int halfHeight = bounds.GetHeight() / 2;
 
 	// 4분할을 담당하는 객체 생성.
 	topLeft = new Node(Bounds(x, y, halfWidth, halfHeight), depth + 1);
@@ -162,12 +162,12 @@ std::vector<Node::NodeIndex> Node::GetQuads(
 	std::vector<NodeIndex> quads;
 
 	// 영역 계산에 필요한 변수.
-	float x = bounds.GetX();
-	float y = bounds.GetY();
-	float halfWidth = bounds.GetWidth() / 2.0f;
-	float halfHeight = bounds.GetHeight() / 2.0f;
-	float centerX = x + halfWidth;
-	float centerY = y + halfHeight;
+	int x = bounds.GetX();
+	int y = bounds.GetY();
+	int halfWidth = bounds.GetWidth() / 2;
+	int halfHeight = bounds.GetHeight() / 2;
+	int centerX = x + halfWidth;
+	int centerY = y + halfHeight;
 
 	// 왼쪽 영역에 완전히 포함되는지 확인.
 	bool left = targetBounds.GetX() >= x && targetBounds.GetXMax() <= centerX;
