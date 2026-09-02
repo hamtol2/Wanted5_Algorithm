@@ -56,7 +56,31 @@ bool Node::Insert(Node* node)
 }
 
 void Node::Query(const Bounds& queryBounds, std::vector<Node*>& results) const
-{}
+{
+	// 검사 영역과 겹치지 않으면 더이상 검사 안함.
+	if (!bounds.Intersects(queryBounds))
+	{
+		return;
+	}
+
+	// 현재 노드에 저장된 객체를 실제 영역과 비교.
+	for (Node* const point : points)
+	{
+		if (point && point->GetBounds().Intersects(queryBounds))
+		{
+			results.emplace_back(point);
+		}
+	}
+
+	// 분할된 경우라면 자식 노드까지 검사.
+	if (IsDivided())
+	{
+		topLeft->Query(queryBounds, results);
+		topRight->Query(queryBounds, results);
+		bottomLeft->Query(queryBounds, results);
+		bottomRight->Query(queryBounds, results);
+	}
+}
 
 void Node::Clear()
 {
